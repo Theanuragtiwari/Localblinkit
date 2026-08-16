@@ -1,110 +1,60 @@
+# LocalQuick
 
-# LocalQuick V3 — Complete Local Quick-Commerce Starter
+Production-foundation quick-commerce starter for local shops.
 
-A complete, runnable local-commerce platform foundation for a specific locality.
+## Stack (current)
+- FastAPI + SQLAlchemy + Pydantic
+- PostgreSQL/SQLite (env configurable)
+- JWT auth with role-based guards
+- WebSocket rider location updates
+- Docker Compose (API + Postgres + Redis + Web)
 
-## Stack
-- FastAPI + SQLAlchemy
-- SQLite by default for zero-setup local development
-- PostgreSQL-ready through DATABASE_URL
-- JWT authentication
-- Role-based Customer / Shop / Delivery / Admin
-- Responsive mobile-first web frontend
-- Cart + checkout
-- COD + mock online payment
-- Shop order workflow
-- Delivery assignment
-- Rider GPS endpoint
-- WebSocket live order updates
-- Admin dashboard
-- Delivery-radius enforcement
-- Docker Compose
-- Razorpay/Google Maps configuration hooks
+## Local setup (single process)
 
-## 1. Run locally
-
-### Backend
-```bash
-cd backend
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux:
-# source .venv/bin/activate
-
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
-
-### Frontend
-In another terminal:
-```bash
-cd frontend
-python -m http.server 5500
-```
-
-Open:
-http://127.0.0.1:5500
-
-API:
-http://127.0.0.1:8000
-
-Swagger:
-http://127.0.0.1:8000/docs
-
-## 2. Seed the demo data
-
-Open Swagger and execute:
-POST /seed
-
-Demo accounts:
-- Customer: customer@localquick.test / customer123
-- Shop: shop@localquick.test / shop123
-- Delivery: rider@localquick.test / rider123
-- Admin: admin@localquick.test / admin123
-
-## 3. Docker + PostgreSQL
+1. Create `.env` from `.env.example` and set secrets.
+2. Start services:
 
 ```bash
 docker compose up --build
 ```
 
-API:
-http://127.0.0.1:8000
+3. Open:
+- Web: http://127.0.0.1:5500
+- API: http://127.0.0.1:8000
+- API Docs: http://127.0.0.1:8000/docs
 
-PostgreSQL is exposed on localhost:5432.
+4. Seed demo data:
 
-## 4. Product flow
+```bash
+curl -X POST http://127.0.0.1:8000/seed
+```
 
-Customer:
-Login → location → shop → products → cart → checkout → order tracking.
+Demo users:
+- `customer@localquick.test` / `customer123`
+- `shop@localquick.test` / `shop123`
+- `rider@localquick.test` / `rider123`
+- `admin@localquick.test` / `admin123`
 
-Shop:
-Login → dashboard → accept → pack → ready for rider.
+## Environment variables
+See `.env.example`.
 
-Delivery:
-Login → available orders → accept → share GPS → delivered.
+## API style
+All API responses use:
 
-Admin:
-Login → metrics → orders → assign rider.
+```json
+{
+  "success": true,
+  "message": "...",
+  "error_code": null,
+  "data": {}
+}
+```
 
-## 5. Production integrations
+Routes are available on both:
+- Backward compatibility: `/...`
+- Versioned: `/api/v1/...`
 
-The code is deliberately safe to run without secret keys. Add:
-- RAZORPAY_KEY_ID
-- RAZORPAY_KEY_SECRET
-- GOOGLE_MAPS_API_KEY
-
-Before production:
-- Replace mock payment with Razorpay server-side order creation + signature verification.
-- Restrict Google Maps API key by application/domain.
-- Use PostgreSQL.
-- Set a long random JWT_SECRET.
-- Put API behind HTTPS.
-- Configure CORS to the production frontend origin.
-- Add Redis for scale-out WebSocket broadcasting.
-- Add object storage for product images.
-- Add SMS/WhatsApp/email provider for notifications.
-
-## Important
-This is a complete runnable application starter, but no assistant can safely invent your real Razorpay account credentials, Google API key, domain, payment webhooks, or production cloud account. Those are configured through `.env`.
+## Notes
+- `payments/mock-success` exists for local testing only.
+- Razorpay and Google Maps keys must be provided by environment variables.
+- Never commit secrets.

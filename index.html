@@ -12,7 +12,7 @@
 </main>
 <script>
 const API="http://127.0.0.1:8000";let shops=[];
-async function load(lat,lng){let u=API+"/shops";if(lat)u+=`?lat=${lat}&lng=${lng}`;shops=await (await fetch(u)).json();render()}
+async function load(lat,lng){let u=API+"/shops";if(lat)u+=`?lat=${lat}&lng=${lng}`;let res=await (await fetch(u)).json();shops=(res.data||res);render()}
 function locate(){navigator.geolocation?.getCurrentPosition(p=>load(p.coords.latitude,p.coords.longitude),()=>load())}
 function render(){let q=search.value.toLowerCase();document.querySelector("#shops").innerHTML=shops.filter(s=>s.name.toLowerCase().includes(q)).map(s=>`<a class="card" href="shop.html?id=${s.id}"><div class="icon">🏪</div><h3>${s.name}</h3><p>${s.area}</p><b>₹${s.delivery_fee} delivery</b>${s.distance_km!==null?`<small>${s.distance_km} km away</small>`:""}</a>`).join("")}
 load();

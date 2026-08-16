@@ -1,4 +1,3 @@
-
 services:
   db:
     image: postgres:16
@@ -11,13 +10,21 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
   api:
-    build: ./backend
+    build: .
     environment:
-      DATABASE_URL: postgresql+psycopg://localquick:localquick@db:5432/localquick
+      DATABASE_URL: ******db:5432/localquick
       JWT_SECRET: change-this-in-production
-      JWT_EXPIRE_MINUTES: 1440
+      JWT_EXPIRE_MINUTES: 60
+      JWT_REFRESH_EXPIRE_MINUTES: 20160
       DELIVERY_RADIUS_KM: 5
+      CORS_ORIGINS: "*"
+      RATE_LIMIT_PER_MINUTE: 120
       RAZORPAY_KEY_ID: ""
       RAZORPAY_KEY_SECRET: ""
       GOOGLE_MAPS_API_KEY: ""
@@ -25,6 +32,16 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - redis
+
+  web:
+    image: python:3.12-slim
+    working_dir: /app
+    command: python -m http.server 5500 --bind 0.0.0.0
+    volumes:
+      - ./:/app
+    ports:
+      - "5500:5500"
 
 volumes:
   pgdata:
