@@ -1,0 +1,30 @@
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: localquick
+      POSTGRES_USER: localquick
+      POSTGRES_PASSWORD: localquick
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://localquick:localquick@db:5432/localquick
+      JWT_SECRET: change-this-in-production
+      JWT_EXPIRE_MINUTES: 1440
+      DELIVERY_RADIUS_KM: 5
+      RAZORPAY_KEY_ID: ""
+      RAZORPAY_KEY_SECRET: ""
+      GOOGLE_MAPS_API_KEY: ""
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
