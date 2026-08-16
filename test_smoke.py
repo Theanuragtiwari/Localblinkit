@@ -1,6 +1,11 @@
+from fastapi.testclient import TestClient
 
-import urllib.request, json, time
+from main import app
 
-base="http://127.0.0.1:8000"
-print(urllib.request.urlopen(base+"/health").read().decode())
-print("Start the API, then POST /seed from Swagger.")
+
+def test_health_smoke():
+    client = TestClient(app)
+    r = client.get('/health')
+    assert r.status_code == 200
+    body = r.json()
+    assert body['success'] is True
